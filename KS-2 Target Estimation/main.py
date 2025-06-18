@@ -16,6 +16,8 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import KFold
 import xgboost as xgb
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware import Middleware
 
 ##### ===================== KS-2 연신&방사 feature를 활용한 target 값 예측 =====================
 
@@ -174,23 +176,24 @@ def predict_KS_2_Y(features: FeatureInput_KS_2_Y):
 
 ## uvicorn fastapi ##
 
-app = FastAPI()
-
 # CORS 설정
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+]
+
+app = FastAPI(middleware=middleware)
 
 # 예측 엔드포인트 (KS-2 연신 전용)
 @app.post("/predict_KS_2_Y")
-async def predict_target(features: dict):
+async def predict_target(features: FeatureInput_KS_2_Y):  # ✅ Pydantic 모델로 명시
     try:
-        feature_instance = FeatureInput_KS_2_Y(**features)
-        result = predict_KS_2_Y(features=feature_instance)
+        result = predict_KS_2_Y(features=features)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"예측 오류: {str(e)}")
