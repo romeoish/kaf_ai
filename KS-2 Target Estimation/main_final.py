@@ -110,7 +110,7 @@ def predict_KS_2_Y(features: FeatureInput_KS_2_Y):
 
     return {
         "result": {
-            "Denier": float(pred_denial[0][0]),
+            "Denier": float(pred_denial[0]),
             "Tenacity": float(pred[0][2]),
             "Elongation": float(pred[0][3]),
             "Total Finish": float(pred[0][0])
